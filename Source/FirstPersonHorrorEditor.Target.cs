@@ -10,5 +10,8 @@ public class FirstPersonHorrorEditorTarget : TargetRules
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
 		ExtraModuleNames.Add("FirstPersonHorror");
+
+		bUseUnityBuild = false;
+		bUsePCHFiles = false;
 	}
 }
