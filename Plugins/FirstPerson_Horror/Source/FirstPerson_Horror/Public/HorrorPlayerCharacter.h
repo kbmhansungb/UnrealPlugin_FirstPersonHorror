@@ -4,8 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Components/CapsuleComponent.h"
 #include "HorrorPlayerCharacter.generated.h"
+
+class UCameraComponent;
 
 UCLASS(BlueprintType)
 class FIRSTPERSON_HORROR_API AHorrorPlayerCharacter : public ACharacter
@@ -13,8 +14,11 @@ class FIRSTPERSON_HORROR_API AHorrorPlayerCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AHorrorPlayerCharacter();
+
+protected:
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UCameraComponent* DefaultCamera;
 
 protected:
 	// Called when the game starts or when spawned
