@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Components/CapsuleComponent.h"
 #include "HorrorPlayerCharacter.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType)
 class FIRSTPERSON_HORROR_API AHorrorPlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
@@ -26,4 +27,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+protected:
+	void MoveForward(float Scale);
+	void MoveRight(float Scale);
 };

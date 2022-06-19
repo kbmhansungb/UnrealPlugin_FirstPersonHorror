@@ -10,8 +10,9 @@
  * 
  */
 UCLASS()
-class FIRSTPERSON_HORROR_API AHorrorPlayerController : public APlayerController
+class FIRSTPERSON_HORROR_API AHorrorPlayerController final : public APlayerController
 {
 	GENERATED_BODY()
-	
+
+protected:
 };

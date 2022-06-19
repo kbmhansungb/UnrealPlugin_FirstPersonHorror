@@ -2,6 +2,7 @@
 
 
 #include "HorrorPlayerCharacter.h"
+#include "Components/InputComponent.h"
 
 // Sets default values
 AHorrorPlayerCharacter::AHorrorPlayerCharacter()
@@ -30,5 +31,26 @@ void AHorrorPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	
+	PlayerInputComponent->BindAxis("MoveForward", this, &AHorrorPlayerCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AHorrorPlayerCharacter::MoveRight);
+
+	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+
+	//PlayerInputComponent->BindAxis("TurnRate", this, &TurnAtRate);
+	//PlayerInputComponent->BindAxis("LookUpRate", this, &LookUpAtRate);
+}
+
+void AHorrorPlayerCharacter::MoveForward(float Scale)
+{
+	AddMovementInput(GetCapsuleComponent()->GetForwardVector(), Scale);
+}
+
+void AHorrorPlayerCharacter::MoveRight(float Scale)
+{
+	AddMovementInput(GetCapsuleComponent()->GetRightVector(), Scale);
 }
 
