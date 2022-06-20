@@ -8,15 +8,14 @@
 #include "FootResponseDataAsset.generated.h"
 
 class APlayerController;
-class UCamerashake;
 
 USTRUCT(BlueprintType)
 struct FIRSTPERSON_HORROR_API FFootResponseStruct
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCameraShake* CameraShake;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//UCameraShake* CameraShake;
 };
 
 /**
