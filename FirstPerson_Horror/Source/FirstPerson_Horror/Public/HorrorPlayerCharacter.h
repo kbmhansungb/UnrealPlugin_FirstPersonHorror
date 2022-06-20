@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "DelegateEvent.h"
 #include "HorrorPlayerCharacter.generated.h"
 
 class UCameraComponent;
@@ -34,4 +35,25 @@ public:
 protected:
 	void MoveForward(float Scale);
 	void MoveRight(float Scale);
+
+#pragma region FootStrike
+
+public:
+	FFootStrikeDelegate FootStrikeDelegate;
+
+	/**
+	 * Passed from the Anim instance to the Notify.
+	 */
+	UFUNCTION(BlueprintCallable)
+	void CallFootStrike(FName SocketName, float FootVelocityLength, ECollisionChannel TraceChannel);
+
+protected:
+	UFUNCTION(Category = "FootStrike", BlueprintImplementableEvent)
+	void PlayFootSound(const FFootHitEvent& FootHitEvent);
+
+	UFUNCTION(Category = "FootStrike", BlueprintImplementableEvent)
+	void ShakeCameraFromFoot(const FFootHitEvent& FootHitEvent);
+	
+#pragma endregion
+
 };

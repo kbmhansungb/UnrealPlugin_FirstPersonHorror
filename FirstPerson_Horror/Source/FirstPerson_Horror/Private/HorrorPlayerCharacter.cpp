@@ -5,6 +5,9 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/PawnMovementComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 
 // Sets default values
 AHorrorPlayerCharacter::AHorrorPlayerCharacter()
@@ -22,7 +25,13 @@ AHorrorPlayerCharacter::AHorrorPlayerCharacter()
 void AHorrorPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	FootStrikeDelegate.AddUObject(this, &AHorrorPlayerCharacter::PlayFootSound);
+
+	if (Cast<APlayerController>(GetController()))
+	{
+		FootStrikeDelegate.AddUObject(this, &AHorrorPlayerCharacter::ShakeCameraFromFoot);
+	}
 }
 
 // Called every frame
@@ -45,9 +54,6 @@ void AHorrorPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-
-	//PlayerInputComponent->BindAxis("TurnRate", this, &TurnAtRate);
-	//PlayerInputComponent->BindAxis("LookUpRate", this, &LookUpAtRate);
 }
 
 void AHorrorPlayerCharacter::MoveForward(float Scale)
@@ -58,5 +64,25 @@ void AHorrorPlayerCharacter::MoveForward(float Scale)
 void AHorrorPlayerCharacter::MoveRight(float Scale)
 {
 	AddMovementInput(GetCapsuleComponent()->GetRightVector(), Scale);
+}
+
+void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float FootVelocityLength, ECollisionChannel TraceChannel)
+{
+	FFootHitEvent FootHitEvent;
+	FootHitEvent.FootVelocityLength = FootVelocityLength;
+	
+	if (GetMesh()->SkeletalMesh)
+	{
+		FHitResult HitResult;
+		FVector Start = GetMesh()->GetSocketLocation(SocketName);
+		const FVector Offset = FVector(0.0f, 0.0f, -15.0f);
+
+		FootHitEvent.IsHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, Start - Offset, TraceChannel);
+		FootHitEvent.HitLocation = HitResult.Location;
+		FootHitEvent.HitPhysicsMaterial = HitResult.PhysMaterial.Get();
+	}
+
+	if (FootStrikeDelegate.IsBound())
+		FootStrikeDelegate.Broadcast(FootHitEvent);
 }
 
