@@ -56,4 +56,12 @@ protected:
 	
 #pragma endregion
 
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName MovementTag;
+
+	void UpdateMovementTag();
+
+private:
+	void BaseChange() override;
 };

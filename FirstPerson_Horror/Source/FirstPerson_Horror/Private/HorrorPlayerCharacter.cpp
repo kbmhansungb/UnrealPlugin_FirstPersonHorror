@@ -86,3 +86,33 @@ void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float FootVelocity
 		FootStrikeDelegate.Broadcast(FootHitEvent);
 }
 
+void AHorrorPlayerCharacter::UpdateMovementTag()
+{
+	UPrimitiveComponent* MovementBase = GetMovementBase();
+	if (MovementBase != nullptr)
+	{
+		int32 Index = MovementBase->ComponentTags.Find(FName("Movement"));
+
+#if WITH_EDITOR
+		if (MovementBase->ComponentTags.IsValidIndex(Index + 1) == false)
+		{
+			MovementTag = FName();
+			UE_LOG(LogTemp, Error, TEXT("InValid Index"));
+			return;
+		}
+#endif
+		MovementTag = MovementBase->ComponentTags[Index + 1];
+	}
+	else
+	{
+		MovementTag = FName();
+	}
+}
+
+void AHorrorPlayerCharacter::BaseChange()
+{
+	Super::BaseChange();
+
+	UpdateMovementTag();
+}
+
