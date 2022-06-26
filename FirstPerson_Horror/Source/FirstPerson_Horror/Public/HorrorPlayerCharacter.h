@@ -33,8 +33,34 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
-	void MoveForward(float Scale);
-	void MoveRight(float Scale);
+	UPROPERTY(Category = "Pawn|Input", EditAnywhere, BlueprintReadWrite)
+	bool AllowJump = true;
+
+	UPROPERTY(Category = "Pawn|Input", EditAnywhere, BlueprintReadWrite)
+	bool AllowMovement = true;
+
+	UPROPERTY(Category = "Pawn|Input", EditAnywhere, BlueprintReadWrite)
+	bool AllowControllerInput = true;
+
+public:
+	UFUNCTION(Category = "Pawn|Input", BlueprintCallable)
+	void SetAllowJump(bool NewState);
+
+	UFUNCTION(Category = "Pawn|Input", BlueprintCallable)
+	void SetAllowMovement(bool NewState);
+
+	UFUNCTION(Category = "Pawn|Input", BlueprintCallable)
+	void SetAllowControllerInput(bool NewState);
+
+protected:
+	void Jump();
+	void StopJumping();
+
+	void MoveForward(float Val);
+	void MoveRight(float Val);
+
+	void AddControllerYawInput(float Val);
+	void AddControllerPitchInput(float Val);
 
 #pragma region FootStrike
 

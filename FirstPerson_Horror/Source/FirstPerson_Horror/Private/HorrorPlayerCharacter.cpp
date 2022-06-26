@@ -38,7 +38,6 @@ void AHorrorPlayerCharacter::BeginPlay()
 void AHorrorPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -46,24 +45,74 @@ void AHorrorPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-	
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AHorrorPlayerCharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AHorrorPlayerCharacter::StopJumping);
+
 	PlayerInputComponent->BindAxis("MoveForward", this, &AHorrorPlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AHorrorPlayerCharacter::MoveRight);
 
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("Turn", this, &AHorrorPlayerCharacter::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("LookUp", this, &AHorrorPlayerCharacter::AddControllerPitchInput);
 }
 
-void AHorrorPlayerCharacter::MoveForward(float Scale)
+void AHorrorPlayerCharacter::SetAllowJump(bool NewState)
 {
-	AddMovementInput(GetCapsuleComponent()->GetForwardVector(), Scale);
+	AllowJump = NewState;
 }
 
-void AHorrorPlayerCharacter::MoveRight(float Scale)
+void AHorrorPlayerCharacter::SetAllowMovement(bool NewState)
 {
-	AddMovementInput(GetCapsuleComponent()->GetRightVector(), Scale);
+	AllowMovement = NewState;
+}
+
+void AHorrorPlayerCharacter::SetAllowControllerInput(bool NewState)
+{
+	AllowControllerInput = NewState;
+}
+
+void AHorrorPlayerCharacter::Jump()
+{
+	if (AllowJump == false)
+		return;
+
+	ACharacter::Jump();
+}
+
+void AHorrorPlayerCharacter::StopJumping()
+{
+	ACharacter::StopJumping();
+}
+
+void AHorrorPlayerCharacter::MoveForward(float Val)
+{
+	if (AllowMovement == false)
+		return;
+
+	AddMovementInput(GetCapsuleComponent()->GetForwardVector(), Val);
+}
+
+void AHorrorPlayerCharacter::MoveRight(float Val)
+{
+	if (AllowMovement == false)
+		return;
+
+	AddMovementInput(GetCapsuleComponent()->GetRightVector(), Val);
+}
+
+void AHorrorPlayerCharacter::AddControllerYawInput(float Val)
+{
+	if (AllowControllerInput == false)
+		return;
+
+	APawn::AddControllerYawInput(Val);
+}
+
+void AHorrorPlayerCharacter::AddControllerPitchInput(float Val)
+{
+	if (AllowControllerInput == false)
+		return;
+
+	APawn::AddControllerPitchInput(Val);
 }
 
 void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float FootVelocityLength, ECollisionChannel TraceChannel)
