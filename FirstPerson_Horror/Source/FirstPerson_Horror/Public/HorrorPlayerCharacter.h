@@ -80,6 +80,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CallFootStrike(FName SocketName, float FootVelocityLength, ECollisionChannel TraceChannel, const FVector& Offset);
 
+	virtual void TraceFoot(ECollisionChannel TraceChannel, const FVector& Start, const FVector& End, FFootHitEvent& FootHitEvent);
+
 protected:
 	UFUNCTION(Category = "FootStrike", BlueprintImplementableEvent)
 	void PlayFootSound(const FFootHitEvent& FootHitEvent);

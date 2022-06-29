@@ -122,60 +122,67 @@ void AHorrorPlayerCharacter::AddControllerPitchInput(float Val)
 
 void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float FootVelocityLength, ECollisionChannel TraceChannel, const FVector& Offset)
 {
+	FFootHitEvent FootHitEvent{};
+
+	if (GetMesh()->SkeletalMesh)
+	{
+		const FVector SocketLocation = GetMesh()->GetSocketLocation(SocketName);
+		const FVector Start = SocketLocation + Offset;
+		const FVector End = SocketLocation - Offset;
+
+		TraceFoot(TraceChannel, Start, End, FootHitEvent);
+	}
+
+	FootHitEvent.FootVelocityLength = FootVelocityLength;
+
+	if (FootStrikeDelegate.IsBound())
+		FootStrikeDelegate.Broadcast(FootHitEvent);
+}
+
+void AHorrorPlayerCharacter::TraceFoot(ECollisionChannel TraceChannel, const FVector& Start, const FVector& End, FFootHitEvent& FootHitEvent)
+{
 #if !NO_CVARS
 	static const auto HPC_DebugFootStrike = IConsoleManager::Get().FindConsoleVariable(TEXT("HPC.DebugFootStrike"));
 #endif
 
-	FFootHitEvent FootHitEvent;
-	FootHitEvent.FootVelocityLength = FootVelocityLength;
-
-	if (GetMesh()->SkeletalMesh)
+	FHitResult HitResult;
+	TArray<AActor*> TraceIgnore;
+	if (GetMesh()->GetOwner())
 	{
-		FHitResult HitResult;
-		const FVector Start = GetMesh()->GetSocketLocation(SocketName) + Offset;
-		const FVector End = GetMesh()->GetSocketLocation(SocketName) - Offset;
-
-		TArray<AActor*> TraceIgnore;
-		if (GetMesh()->GetOwner())
-		{
-			TraceIgnore.Add(GetMesh()->GetOwner());
-		}
-
-		FootHitEvent.IsHit = UKismetSystemLibrary::LineTraceSingle(
-			this, 
-			Start, 
-			End, 
-			UEngineTypes::ConvertToTraceType(TraceChannel), 
-			IsFootHitComplex,
-			TraceIgnore, 
-#if ENABLE_DRAW_DEBUG && !NO_CVARS
-			HPC_DebugFootStrike->GetBool() ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
-#else
-			EDrawDebugTrace::None,
-#endif
-			HitResult, 
-			false
-		);
-		FootHitEvent.HitLocation = HitResult.Location;
-		FootHitEvent.HitPhysicsMaterial = HitResult.PhysMaterial.Get();
-
-#if !NO_CVARS
-		if (HPC_DebugFootStrike->GetBool())
-		{
-			FString Message;
-			Message += GetMesh()->GetOwner()->GetName();
-			Message += "`s foot strike ";
-			if (HitResult.Actor.IsValid())
-				Message += HitResult.Actor.Get()->GetName();
-			else
-				Message += "nullptr";
-			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, Message);
-		}
-#endif
+		TraceIgnore.Add(GetMesh()->GetOwner());
 	}
 
-	if (FootStrikeDelegate.IsBound())
-		FootStrikeDelegate.Broadcast(FootHitEvent);
+	FootHitEvent.IsHit = UKismetSystemLibrary::LineTraceSingle(
+		this,
+		Start,
+		End,
+		UEngineTypes::ConvertToTraceType(TraceChannel),
+		IsFootHitComplex,
+		TraceIgnore,
+#if ENABLE_DRAW_DEBUG && !NO_CVARS
+		HPC_DebugFootStrike->GetBool() ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
+#else
+		EDrawDebugTrace::None,
+#endif
+		HitResult,
+		false
+	);
+	FootHitEvent.HitLocation = HitResult.Location;
+	FootHitEvent.HitPhysicsMaterial = HitResult.PhysMaterial.Get();
+
+#if !NO_CVARS
+	if (HPC_DebugFootStrike->GetBool())
+	{
+		FString Message;
+		Message += GetMesh()->GetOwner()->GetName();
+		Message += "`s foot strike ";
+		if (HitResult.Actor.IsValid())
+			Message += HitResult.Actor.Get()->GetName();
+		else
+			Message += "nullptr";
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, Message);
+	}
+#endif
 }
 
 void AHorrorPlayerCharacter::UpdateMovementTag()
