@@ -21,6 +21,8 @@ protected:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* DefaultCamera;
 
+#pragma region Movement
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -62,7 +64,12 @@ protected:
 	void AddControllerYawInput(float Val);
 	void AddControllerPitchInput(float Val);
 
+#pragma endregion
+
 #pragma region FootStrike
+
+public:
+	bool IsFootHitComplex = true;
 
 public:
 	FFootStrikeDelegate FootStrikeDelegate;

@@ -146,7 +146,7 @@ void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float FootVelocity
 			Start, 
 			End, 
 			UEngineTypes::ConvertToTraceType(TraceChannel), 
-			true, 
+			IsFootHitComplex,
 			TraceIgnore, 
 #if ENABLE_DRAW_DEBUG && !NO_CVARS
 			HPC_DebugFootStrike->GetBool() ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
