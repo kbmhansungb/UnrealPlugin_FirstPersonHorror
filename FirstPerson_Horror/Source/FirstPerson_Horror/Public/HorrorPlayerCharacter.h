@@ -71,7 +71,7 @@ public:
 	 * Passed from the Anim instance to the Notify.
 	 */
 	UFUNCTION(BlueprintCallable)
-	void CallFootStrike(FName SocketName, float FootVelocityLength, ECollisionChannel TraceChannel);
+	void CallFootStrike(FName SocketName, float FootVelocityLength, ECollisionChannel TraceChannel, const FVector& Offset);
 
 protected:
 	UFUNCTION(Category = "FootStrike", BlueprintImplementableEvent)

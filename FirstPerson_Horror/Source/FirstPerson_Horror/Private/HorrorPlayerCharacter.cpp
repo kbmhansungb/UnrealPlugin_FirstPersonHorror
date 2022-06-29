@@ -8,6 +8,10 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
+
+#include "Engine/GameEngine.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 AHorrorPlayerCharacter::AHorrorPlayerCharacter()
@@ -38,6 +42,7 @@ void AHorrorPlayerCharacter::BeginPlay()
 void AHorrorPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 }
 
 // Called to bind functionality to input
@@ -115,20 +120,58 @@ void AHorrorPlayerCharacter::AddControllerPitchInput(float Val)
 	APawn::AddControllerPitchInput(Val);
 }
 
-void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float FootVelocityLength, ECollisionChannel TraceChannel)
+void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float FootVelocityLength, ECollisionChannel TraceChannel, const FVector& Offset)
 {
+#if !NO_CVARS
+	static const auto HPC_DebugFootStrike = IConsoleManager::Get().FindConsoleVariable(TEXT("HPC.DebugFootStrike"));
+#endif
+
 	FFootHitEvent FootHitEvent;
 	FootHitEvent.FootVelocityLength = FootVelocityLength;
-	
+
 	if (GetMesh()->SkeletalMesh)
 	{
 		FHitResult HitResult;
-		FVector Start = GetMesh()->GetSocketLocation(SocketName);
-		const FVector Offset = FVector(0.0f, 0.0f, -15.0f);
+		const FVector Start = GetMesh()->GetSocketLocation(SocketName) + Offset;
+		const FVector End = GetMesh()->GetSocketLocation(SocketName) - Offset;
 
-		FootHitEvent.IsHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, Start - Offset, TraceChannel);
+		TArray<AActor*> TraceIgnore;
+		if (GetMesh()->GetOwner())
+		{
+			TraceIgnore.Add(GetMesh()->GetOwner());
+		}
+
+		FootHitEvent.IsHit = UKismetSystemLibrary::LineTraceSingle(
+			this, 
+			Start, 
+			End, 
+			UEngineTypes::ConvertToTraceType(TraceChannel), 
+			true, 
+			TraceIgnore, 
+#if ENABLE_DRAW_DEBUG && !NO_CVARS
+			HPC_DebugFootStrike->GetBool() ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
+#else
+			EDrawDebugTrace::None,
+#endif
+			HitResult, 
+			false
+		);
 		FootHitEvent.HitLocation = HitResult.Location;
 		FootHitEvent.HitPhysicsMaterial = HitResult.PhysMaterial.Get();
+
+#if !NO_CVARS
+		if (HPC_DebugFootStrike->GetBool())
+		{
+			FString Message;
+			Message += GetMesh()->GetOwner()->GetName();
+			Message += "`s foot strike ";
+			if (HitResult.Actor.IsValid())
+				Message += HitResult.Actor.Get()->GetName();
+			else
+				Message += "nullptr";
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, Message);
+		}
+#endif
 	}
 
 	if (FootStrikeDelegate.IsBound())

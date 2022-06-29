@@ -18,3 +18,11 @@ void FFirstPerson_HorrorModule::ShutdownModule()
 #undef LOCTEXT_NAMESPACE
 	
 IMPLEMENT_MODULE(FFirstPerson_HorrorModule, FirstPerson_Horror)
+
+
+#if !NO_CVARS
+#include "HAL/IConsoleManager.h"
+
+TAutoConsoleVariable<bool> HPC_DebugFootStrike(TEXT("HPC.DebugFootStrike"), false, TEXT("Debug FootStrike."), ECVF_Default);
+
+#endif
