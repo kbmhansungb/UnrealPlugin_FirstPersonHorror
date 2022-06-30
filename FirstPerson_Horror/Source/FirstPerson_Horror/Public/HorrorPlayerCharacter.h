@@ -68,6 +68,7 @@ protected:
 #pragma region FootStrike
 
 public:
+	UPROPERTY(Category = "Horror", EditAnywhere, BlueprintReadWrite)
 	bool IsFootHitComplex = true;
 
 public:

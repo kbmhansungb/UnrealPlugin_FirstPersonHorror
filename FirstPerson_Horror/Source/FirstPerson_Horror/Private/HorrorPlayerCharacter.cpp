@@ -152,10 +152,11 @@ void AHorrorPlayerCharacter::TraceFoot(ECollisionChannel TraceChannel, const FVe
 		TraceIgnore.Add(GetMesh()->GetOwner());
 	}
 
-	FootHitEvent.IsHit = UKismetSystemLibrary::LineTraceSingle(
+	FootHitEvent.IsHit = UKismetSystemLibrary::CapsuleTraceSingle(
 		this,
 		Start,
 		End,
+		5.f, 0.0f,
 		UEngineTypes::ConvertToTraceType(TraceChannel),
 		IsFootHitComplex,
 		TraceIgnore,
