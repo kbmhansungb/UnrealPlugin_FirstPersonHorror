@@ -120,7 +120,7 @@ void AHorrorPlayerCharacter::AddControllerPitchInput(float Val)
 	APawn::AddControllerPitchInput(Val);
 }
 
-void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float FootVelocityLength, ECollisionChannel TraceChannel, const FVector& Offset)
+void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float Speed, ECollisionChannel TraceChannel, const FVector& Offset)
 {
 	FFootHitEvent FootHitEvent{};
 
@@ -133,7 +133,7 @@ void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float FootVelocity
 		TraceFoot(TraceChannel, Start, End, FootHitEvent);
 	}
 
-	FootHitEvent.FootVelocityLength = FootVelocityLength;
+	FootHitEvent.Speed = Speed;
 
 	if (FootStrikeDelegate.IsBound())
 		FootStrikeDelegate.Broadcast(FootHitEvent);
@@ -145,7 +145,6 @@ void AHorrorPlayerCharacter::TraceFoot(ECollisionChannel TraceChannel, const FVe
 	static const auto HPC_DebugFootStrike = IConsoleManager::Get().FindConsoleVariable(TEXT("HPC.DebugFootStrike"));
 #endif
 
-	FHitResult HitResult;
 	TArray<AActor*> TraceIgnore;
 	if (GetMesh()->GetOwner())
 	{
@@ -165,11 +164,9 @@ void AHorrorPlayerCharacter::TraceFoot(ECollisionChannel TraceChannel, const FVe
 #else
 		EDrawDebugTrace::None,
 #endif
-		HitResult,
+		FootHitEvent.HitResult,
 		false
 	);
-	FootHitEvent.HitLocation = HitResult.Location;
-	FootHitEvent.HitPhysicsMaterial = HitResult.PhysMaterial.Get();
 
 #if !NO_CVARS
 	if (HPC_DebugFootStrike->GetBool())
@@ -177,8 +174,8 @@ void AHorrorPlayerCharacter::TraceFoot(ECollisionChannel TraceChannel, const FVe
 		FString Message;
 		Message += GetMesh()->GetOwner()->GetName();
 		Message += "`s foot strike ";
-		if (HitResult.Actor.IsValid())
-			Message += HitResult.Actor.Get()->GetName();
+		if (FootHitEvent.HitResult.Actor.IsValid())
+			Message += FootHitEvent.HitResult.Actor.Get()->GetName();
 		else
 			Message += "nullptr";
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, Message);

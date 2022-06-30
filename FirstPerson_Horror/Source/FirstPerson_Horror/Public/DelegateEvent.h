@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/EngineTypes.h"
 #include "Delegates/DelegateCombinations.h"
 #include "DelegateEvent.generated.h"
 
@@ -15,13 +16,10 @@ struct FIRSTPERSON_HORROR_API FFootHitEvent
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector HitLocation;
+	FHitResult HitResult;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float FootVelocityLength;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UPhysicalMaterial* HitPhysicsMaterial;
+	float Speed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsHit;
