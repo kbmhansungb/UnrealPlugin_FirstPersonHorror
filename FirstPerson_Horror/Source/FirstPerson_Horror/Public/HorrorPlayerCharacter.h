@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "DelegateEvent.h"
+#include <Kismet/KismetMathLibrary.h>
 #include "HorrorPlayerCharacter.generated.h"
 
 class UCameraComponent;
@@ -62,6 +63,73 @@ protected:
 
 	void AddControllerYawInput(float Val);
 	void AddControllerPitchInput(float Val);
+
+	void AddControllerRotator(const FRotator& Rotator);
+
+#pragma endregion
+
+#pragma region Camera
+
+protected:
+	UPROPERTY(Category = "Camera", EditAnywhere, BlueprintReadWrite)
+	bool IsInDesireCameraRotation;
+
+	UPROPERTY(Category = "Camera", EditAnywhere, BlueprintReadWrite)
+	FRotator DesireCameraRotator;
+
+	UPROPERTY(Category = "Camera", EditAnywhere, BlueprintReadWrite)
+	float CameraLookAtSpeed;
+
+	UPROPERTY(Category = "Camera", VisibleAnywhere, BlueprintReadOnly)
+	float CameraLookAtPrograss;
+
+public:
+	UFUNCTION(Category = "Camera", BlueprintCallable)
+	void RotateCameraToLookAt(FVector NewLookAt = FVector::ForwardVector, float Duration = 0.2f);
+
+protected:
+	void StartRotateCamera();
+	void EndRotateCamera();
+	virtual void UpdateCameraRotationToDesire(float DeletaTime);
+
+#pragma endregion
+
+#pragma region Focus
+
+protected:
+	UPROPERTY(Category = "Focus", EditAnywhere, BlueprintReadWrite)
+	bool IsInFocus;
+
+	UPROPERTY(Category = "Focus", EditAnywhere, BlueprintReadWrite)
+	bool IsFocusIn;
+	
+	UPROPERTY(Category = "Focus", EditAnywhere, BlueprintReadWrite)
+	float FocusSpeed;
+
+	UPROPERTY(Category = "Focus", EditAnywhere, BlueprintReadWrite)
+	float FocalDistanceVector;
+	
+	UPROPERTY(Category = "Focus", EditAnywhere, BlueprintReadWrite)
+	float FocusPrograss;
+
+	UPROPERTY(Category = "Focus", EditAnywhere, BlueprintReadWrite)
+	float FocusWeight;
+
+	UPROPERTY(Category = "Focus", EditAnywhere, BlueprintReadWrite)
+	float SetCircleDOFFromFocus = 3000.f;
+
+	void StartFocusEvent();
+	void EndFocusEvent();
+
+public:
+	UFUNCTION(Category = "Focus", BlueprintCallable)
+	void FocusIn(const FVector& Location, float Duration);
+
+	UFUNCTION(Category = "Focus", BlueprintCallable)
+	void FocusOut(float Duration);
+
+protected:
+	void UpdateFocusEvent(float DeltaTime);
 
 #pragma endregion
 

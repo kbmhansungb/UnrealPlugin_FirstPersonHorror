@@ -7,8 +7,6 @@
 #include "Delegates/DelegateCombinations.h"
 #include "DelegateEvent.generated.h"
 
-class UPhysicalMaterial;
-
 USTRUCT(BlueprintType)
 struct FIRSTPERSON_HORROR_API FFootHitEvent
 {
@@ -29,4 +27,3 @@ DECLARE_MULTICAST_DELEGATE_OneParam(
 FFootStrikeDelegate,
 const FFootHitEvent&
 );
-

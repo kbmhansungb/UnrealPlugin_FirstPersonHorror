@@ -43,6 +43,11 @@ void AHorrorPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (IsInFocus)
+		UpdateFocusEvent(DeltaTime);
+
+	if (IsInDesireCameraRotation)
+		UpdateCameraRotationToDesire(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -118,6 +123,124 @@ void AHorrorPlayerCharacter::AddControllerPitchInput(float Val)
 		return;
 
 	APawn::AddControllerPitchInput(Val);
+}
+
+void AHorrorPlayerCharacter::AddControllerRotator(const FRotator& Rotator)
+{
+	AHorrorPlayerCharacter::AddControllerPitchInput(Rotator.Pitch);
+	AHorrorPlayerCharacter::AddControllerYawInput(Rotator.Yaw);
+}
+
+void AHorrorPlayerCharacter::RotateCameraToLookAt(FVector NewLookAt, float Duration)
+{	
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController == nullptr)
+	{
+		return;
+	}
+
+	const FRotator& DesireRotation = UKismetMathLibrary::FindLookAtRotation(DefaultCamera->GetComponentLocation(), NewLookAt);
+	const FRotator& CameraRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+	DesireCameraRotator = (DesireRotation - CameraRotation);
+	DesireCameraRotator.Normalize();
+
+	DesireCameraRotator.Pitch /= PlayerController->InputPitchScale;
+	DesireCameraRotator.Yaw /= PlayerController->InputYawScale;
+
+	if (Duration > FLT_EPSILON)
+	{
+		CameraLookAtSpeed = 1.0f / Duration;
+		StartRotateCamera();
+	}
+	else
+	{
+		AddControllerRotator(DesireCameraRotator);
+	}
+}
+
+void AHorrorPlayerCharacter::StartRotateCamera()
+{
+	IsInDesireCameraRotation = true;
+	CameraLookAtPrograss = 0.f;
+}
+
+void AHorrorPlayerCharacter::EndRotateCamera()
+{
+	IsInDesireCameraRotation = false;
+}
+
+void AHorrorPlayerCharacter::UpdateCameraRotationToDesire(float DeletaTime)
+{
+	float Delta = DeletaTime * CameraLookAtSpeed;
+	CameraLookAtPrograss += Delta;
+
+	if (CameraLookAtPrograss >= 1.f)
+	{
+		Delta -= (CameraLookAtPrograss - 1.f);
+		EndRotateCamera();
+	}
+
+	AddControllerRotator(DesireCameraRotator * Delta);
+}
+
+void AHorrorPlayerCharacter::StartFocusEvent()
+{
+	IsInFocus = true;
+	FocusPrograss = 0.f;
+}
+
+void AHorrorPlayerCharacter::EndFocusEvent()
+{
+	IsInFocus = false;
+}
+
+void AHorrorPlayerCharacter::FocusIn(const FVector& Location, float Duration)
+{
+	if (Duration <= FLT_EPSILON)
+		return;
+
+	FocusSpeed = 1.f / Duration;
+	IsFocusIn = true;
+
+	if (DefaultCamera->PostProcessSettings.DepthOfFieldFocalDistance == 0.f)
+	{
+		DefaultCamera->PostProcessSettings.DepthOfFieldFocalDistance = (Location - GetActorLocation()).Size();
+	}
+	else
+	{
+		FocalDistanceVector
+			= (Location - GetActorLocation()).Size()
+			- DefaultCamera->PostProcessSettings.DepthOfFieldFocalDistance;
+	}
+
+	StartFocusEvent();
+	RotateCameraToLookAt(Location, Duration);
+}
+
+void AHorrorPlayerCharacter::FocusOut(float Duration)
+{
+	FocusSpeed = 1.f / Duration;
+	IsFocusIn = false;
+
+	FocalDistanceVector = 0.f;
+
+	StartFocusEvent();
+}
+
+void AHorrorPlayerCharacter::UpdateFocusEvent(float DeltaTime)
+{
+	float Delta = DeltaTime * FocusSpeed;
+	FocusPrograss += DeltaTime;
+	FocusWeight = FMath::Clamp(IsFocusIn ? FocusWeight + Delta : FocusWeight - Delta, 0.f, 1.f);
+
+	if (FocusPrograss >= 1.f)
+	{
+		Delta -= FocusPrograss - 1.f;
+		EndFocusEvent();
+	}
+
+	DefaultCamera->PostProcessSettings.DepthOfFieldDepthBlurRadius = FocusWeight * SetCircleDOFFromFocus;
+	DefaultCamera->PostProcessSettings.DepthOfFieldFocalDistance += FocalDistanceVector * Delta;
 }
 
 void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float Speed, ECollisionChannel TraceChannel, const FVector& Offset)
