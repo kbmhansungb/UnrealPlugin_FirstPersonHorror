@@ -57,6 +57,7 @@ public:
 protected:
 	void Jump();
 	void StopJumping();
+	virtual void Landed(const FHitResult& HitResult) override;
 
 	void MoveForward(float Val);
 	void MoveRight(float Val);
@@ -69,22 +70,32 @@ protected:
 public:
 	UPROPERTY(Category = "Movement", EditAnywhere, BlueprintReadWrite)
 	bool IsFootHitComplex = true;
+	
+	UPROPERTY(Category = "Movement", EditAnywhere, BlueprintReadWrite)
+	TEnumAsByte<ECollisionChannel> FootTraceChannel;
 
 public:
 	FFootStrikeDelegate FootStrikeDelegate;
 	
 	UFUNCTION(BlueprintCallable)
-	void CallFootStrike(FName SocketName, float Speed, ECollisionChannel TraceChannel, const FVector& Offset);
+	void CallFootStrike(FName SocketName, float Speed);
 
 protected:
-	virtual void TraceFoot(ECollisionChannel TraceChannel, const FVector& Start, const FVector& End, FFootHitEvent& FootHitEvent);
-
-	UFUNCTION(Category = "Movement", BlueprintImplementableEvent)
+	virtual void TraceFoot(const FVector& Start, const FVector& End, FFootHitEvent& FootHitEvent);
+	
 	void PlayFootSound(const FFootHitEvent& FootHitEvent);
-
-	UFUNCTION(Category = "Movement", BlueprintImplementableEvent)
 	void ShakeCameraFromFoot(const FFootHitEvent& FootHitEvent);
 	
+	UFUNCTION(Category = "Movement", BlueprintNativeEvent)
+	void GetFootStrikeTraceLine(const FName& SocketName, FVector& StartOffset, FVector& EndOffset);
+	virtual void GetFootStrikeTraceLine_Implementation(const FName& SocketName, FVector& StartOffset, FVector& EndOffset);
+
+	UFUNCTION(Category = "Movement", BlueprintImplementableEvent)
+	USoundBase* GetFootSound(const FFootHitEvent& FootHitEvent);
+
+	UFUNCTION(Category = "Movement", BlueprintImplementableEvent)
+	TSubclassOf<UCameraShakeBase> GetFootShakeCameraClass(const FFootHitEvent& FootHitEvent);
+
 #pragma endregion
 
 #pragma region Camera

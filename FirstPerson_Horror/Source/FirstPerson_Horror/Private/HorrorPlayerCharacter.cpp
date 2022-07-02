@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -29,13 +30,6 @@ AHorrorPlayerCharacter::AHorrorPlayerCharacter()
 void AHorrorPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	FootStrikeDelegate.AddUObject(this, &AHorrorPlayerCharacter::PlayFootSound);
-
-	if (Cast<APlayerController>(GetController()))
-	{
-		FootStrikeDelegate.AddUObject(this, &AHorrorPlayerCharacter::ShakeCameraFromFoot);
-	}
 }
 
 // Called every frame
@@ -93,6 +87,13 @@ void AHorrorPlayerCharacter::StopJumping()
 	ACharacter::StopJumping();
 }
 
+void AHorrorPlayerCharacter::Landed(const FHitResult& HitResult)
+{
+	Super::Landed(HitResult);
+
+	CallFootStrike(FName("RightFoot"), GetCharacterMovement()->Velocity.Size());
+}
+
 void AHorrorPlayerCharacter::MoveForward(float Val)
 {
 	if (AllowMovement == false)
@@ -131,29 +132,35 @@ void AHorrorPlayerCharacter::AddControllerRotator(const FRotator& Rotator)
 	AHorrorPlayerCharacter::AddControllerYawInput(Rotator.Yaw);
 }
 
-void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float Speed, ECollisionChannel TraceChannel, const FVector& Offset)
+void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float Speed)
 {
 	FFootHitEvent FootHitEvent{};
 
+	FootHitEvent.SocketName = SocketName;
+	FootHitEvent.Speed = Speed;
 	if (GetMesh()->SkeletalMesh)
 	{
 		const FVector SocketLocation = GetMesh()->GetSocketLocation(SocketName);
-		const FVector Start = SocketLocation + Offset;
-		const FVector End = SocketLocation - Offset;
+		FVector Start;
+		FVector End;
+		GetFootStrikeTraceLine(SocketName, Start, End);
+		Start += SocketLocation;
+		End += SocketLocation;
 
-		TraceFoot(TraceChannel, Start, End, FootHitEvent);
+		TraceFoot(Start, End, FootHitEvent);
 	}
 
-	FootHitEvent.Speed = Speed;
+	PlayFootSound(FootHitEvent);
+	ShakeCameraFromFoot(FootHitEvent);
 
 	if (FootStrikeDelegate.IsBound())
 		FootStrikeDelegate.Broadcast(FootHitEvent);
 }
 
-void AHorrorPlayerCharacter::TraceFoot(ECollisionChannel TraceChannel, const FVector& Start, const FVector& End, FFootHitEvent& FootHitEvent)
+void AHorrorPlayerCharacter::TraceFoot(const FVector& Start, const FVector& End, FFootHitEvent& FootHitEvent)
 {
 #if !NO_CVARS
-	static const auto HPC_DebugFootStrike = IConsoleManager::Get().FindConsoleVariable(TEXT("HPC.DebugFootStrike"));
+	static const auto DebugFootStrike = IConsoleManager::Get().FindConsoleVariable(TEXT("Horror.DebugFootStrike"));
 #endif
 
 	TArray<AActor*> TraceIgnore;
@@ -167,11 +174,11 @@ void AHorrorPlayerCharacter::TraceFoot(ECollisionChannel TraceChannel, const FVe
 		Start,
 		End,
 		5.f, 0.0f,
-		UEngineTypes::ConvertToTraceType(TraceChannel),
+		UEngineTypes::ConvertToTraceType(FootTraceChannel),
 		IsFootHitComplex,
 		TraceIgnore,
 #if ENABLE_DRAW_DEBUG && !NO_CVARS
-		HPC_DebugFootStrike->GetBool() ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
+		DebugFootStrike->GetBool() ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
 #else
 		EDrawDebugTrace::None,
 #endif
@@ -180,7 +187,7 @@ void AHorrorPlayerCharacter::TraceFoot(ECollisionChannel TraceChannel, const FVe
 	);
 
 #if !NO_CVARS
-	if (HPC_DebugFootStrike->GetBool())
+	if (DebugFootStrike->GetBool())
 	{
 		FString Message;
 		Message += GetMesh()->GetOwner()->GetName();
@@ -192,6 +199,31 @@ void AHorrorPlayerCharacter::TraceFoot(ECollisionChannel TraceChannel, const FVe
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, Message);
 	}
 #endif
+}
+
+void AHorrorPlayerCharacter::PlayFootSound(const FFootHitEvent& FootHitEvent)
+{
+	if (FootHitEvent.IsHit)
+	{
+		USoundBase* Sound = GetFootSound(FootHitEvent);
+		UGameplayStatics::PlaySoundAtLocation(this, Sound, FootHitEvent.HitResult.Location);
+	}
+}
+
+void AHorrorPlayerCharacter::ShakeCameraFromFoot(const FFootHitEvent& FootHitEvent)
+{
+	if (this->IsPlayerControlled())
+	{
+		TSubclassOf<UCameraShakeBase> CameraShakeClass = GetFootShakeCameraClass(FootHitEvent);
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+		PlayerController->ClientPlayCameraShake(CameraShakeClass);
+	}
+}
+
+void AHorrorPlayerCharacter::GetFootStrikeTraceLine_Implementation(const FName& SocketName, FVector& StartOffset, FVector& EndOffset)
+{
+	StartOffset = FVector(0.f, 0.f, 40.f);
+	EndOffset = FVector(0.f, 0.f, -40.f);
 }
 
 void AHorrorPlayerCharacter::RotateCameraToLookAt(const FVector& NewLookAt, float Duration)

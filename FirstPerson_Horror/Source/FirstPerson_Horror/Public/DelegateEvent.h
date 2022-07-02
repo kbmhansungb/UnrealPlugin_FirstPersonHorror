@@ -13,6 +13,9 @@ struct FIRSTPERSON_HORROR_API FFootHitEvent
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditANywhere, BlueprintReadWrite)
+	FName SocketName;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FHitResult HitResult;
 
@@ -22,6 +25,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsHit;
 };
+//constexpr int Size = sizeof(FFootHitEvent);
 
 DECLARE_MULTICAST_DELEGATE_OneParam(
 FFootStrikeDelegate,

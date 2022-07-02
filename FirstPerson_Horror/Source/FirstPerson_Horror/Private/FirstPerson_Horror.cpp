@@ -21,8 +21,44 @@ IMPLEMENT_MODULE(FFirstPerson_HorrorModule, FirstPerson_Horror)
 
 
 #if !NO_CVARS
-#include "HAL/IConsoleManager.h"
+#include <HAL/IConsoleManager.h>
+#include <Kismet/GameplayStatics.h>
+#include <GameFramework/PlayerController.h>
+#include <Components/SkeletalMeshComponent.h>
+#include "HorrorPlayerCharacter.h"
 
-TAutoConsoleVariable<bool> HPC_DebugFootStrike(TEXT("HPC.DebugFootStrike"), false, TEXT("Debug FootStrike."), ECVF_Default);
+TAutoConsoleVariable<bool> DebugFootStrike(TEXT("Horror.DebugFootStrike"), false, TEXT("Debug FootStrike."), ECVF_Default);
+
+FAutoConsoleCommand CCmd_ToogleCharacterVisibility(
+    TEXT("Horror.ToggleCharacterVisibility"),
+    TEXT("If first person character is vaild."),
+    FConsoleCommandWithArgsDelegate::CreateLambda([](const TArray<FString>& Params)
+        {
+            UWorld* WorldContext = nullptr;
+            for (FWorldContext const& Context : GEngine->GetWorldContexts())
+            {
+                switch (Context.WorldType)
+                {
+                case EWorldType::PIE:
+                    WorldContext = Context.World();
+                    break;
+                case EWorldType::Game:
+                    WorldContext = Context.World();
+                    break;
+                }
+
+                if (WorldContext) break;
+            }
+            if (!WorldContext) return;
+
+            APlayerController* Controller = GEngine->GetFirstLocalPlayerController(WorldContext);
+            if (!Controller) return;
+
+            AHorrorPlayerCharacter* Character = Cast<AHorrorPlayerCharacter>(Controller->GetPawn());
+            if (!Character) return;
+
+            Character->GetMesh()->ToggleVisibility(false);
+        }),
+    ECVF_Default);
 
 #endif
