@@ -85,7 +85,7 @@ protected:
 
 public:
 	UFUNCTION(Category = "Camera", BlueprintCallable)
-	void RotateCameraToLookAt(FVector NewLookAt = FVector::ForwardVector, float Duration = 0.2f);
+	void RotateCameraToLookAt(const FVector& NewLookAt, float Duration = 0.2f);
 
 protected:
 	void StartRotateCamera();
@@ -119,20 +119,20 @@ protected:
 
 public:
 	UFUNCTION(Category = "Camera", BlueprintCallable)
-	void DOFIn(const FVector& Location, float Duration);
+	void DOFIn(const FVector& Location, float Duration = 0.2f);
 
 	UFUNCTION(Category = "Camera", BlueprintCallable)
-	void DOFOut(float Duration);
+	void DOFOut(float Duration = 0.2f);
 
 protected:
 	void UpdateFocusEvent(float DeltaTime);
 
 public:
 	UFUNCTION(Category = "Camera", BlueprintCallable)
-	void FocusIn(const FVector& Location, float Duration);
+	void FocusIn(const FVector& Location, float Duration = 0.2f);
 
 	UFUNCTION(Category = "Camera", BlueprintCallable)
-	void FocusOut(float Duration);
+	void FocusOut(float Duration = 0.2f);
 
 #pragma endregion
 

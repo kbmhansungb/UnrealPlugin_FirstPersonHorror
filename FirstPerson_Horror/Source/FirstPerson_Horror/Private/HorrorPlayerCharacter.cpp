@@ -131,8 +131,8 @@ void AHorrorPlayerCharacter::AddControllerRotator(const FRotator& Rotator)
 	AHorrorPlayerCharacter::AddControllerYawInput(Rotator.Yaw);
 }
 
-void AHorrorPlayerCharacter::RotateCameraToLookAt(FVector NewLookAt, float Duration)
-{	
+void AHorrorPlayerCharacter::RotateCameraToLookAt(const FVector& NewLookAt, float Duration)
+{
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController == nullptr)
 	{
