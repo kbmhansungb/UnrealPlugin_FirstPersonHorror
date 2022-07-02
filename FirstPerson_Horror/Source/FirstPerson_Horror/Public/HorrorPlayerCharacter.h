@@ -35,23 +35,23 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
-	UPROPERTY(Category = "Pawn|Input", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Movement", EditAnywhere, BlueprintReadWrite)
 	bool AllowJump = true;
 
-	UPROPERTY(Category = "Pawn|Input", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Movement", EditAnywhere, BlueprintReadWrite)
 	bool AllowMovement = true;
 
-	UPROPERTY(Category = "Pawn|Input", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Movement", EditAnywhere, BlueprintReadWrite)
 	bool AllowControllerInput = true;
 
 public:
-	UFUNCTION(Category = "Pawn|Input", BlueprintCallable)
+	UFUNCTION(Category = "Movement", BlueprintCallable)
 	void SetAllowJump(bool NewState);
 
-	UFUNCTION(Category = "Pawn|Input", BlueprintCallable)
+	UFUNCTION(Category = "Movement", BlueprintCallable)
 	void SetAllowMovement(bool NewState);
 
-	UFUNCTION(Category = "Pawn|Input", BlueprintCallable)
+	UFUNCTION(Category = "Movement", BlueprintCallable)
 	void SetAllowControllerInput(bool NewState);
 
 protected:
@@ -66,6 +66,25 @@ protected:
 
 	void AddControllerRotator(const FRotator& Rotator);
 
+public:
+	UPROPERTY(Category = "Movement", EditAnywhere, BlueprintReadWrite)
+	bool IsFootHitComplex = true;
+
+public:
+	FFootStrikeDelegate FootStrikeDelegate;
+	
+	UFUNCTION(BlueprintCallable)
+	void CallFootStrike(FName SocketName, float Speed, ECollisionChannel TraceChannel, const FVector& Offset);
+
+protected:
+	virtual void TraceFoot(ECollisionChannel TraceChannel, const FVector& Start, const FVector& End, FFootHitEvent& FootHitEvent);
+
+	UFUNCTION(Category = "Movement", BlueprintImplementableEvent)
+	void PlayFootSound(const FFootHitEvent& FootHitEvent);
+
+	UFUNCTION(Category = "Movement", BlueprintImplementableEvent)
+	void ShakeCameraFromFoot(const FFootHitEvent& FootHitEvent);
+	
 #pragma endregion
 
 #pragma region Camera
@@ -134,32 +153,6 @@ public:
 	UFUNCTION(Category = "Camera", BlueprintCallable)
 	void FocusOut(float Duration = 0.2f);
 
-#pragma endregion
-
-#pragma region FootStrike
-
-public:
-	UPROPERTY(Category = "Horror", EditAnywhere, BlueprintReadWrite)
-	bool IsFootHitComplex = true;
-
-public:
-	FFootStrikeDelegate FootStrikeDelegate;
-
-	/**
-	 * Passed from the Anim instance to the Notify.
-	 */
-	UFUNCTION(BlueprintCallable)
-	void CallFootStrike(FName SocketName, float Speed, ECollisionChannel TraceChannel, const FVector& Offset);
-
-	virtual void TraceFoot(ECollisionChannel TraceChannel, const FVector& Start, const FVector& End, FFootHitEvent& FootHitEvent);
-
-protected:
-	UFUNCTION(Category = "FootStrike", BlueprintImplementableEvent)
-	void PlayFootSound(const FFootHitEvent& FootHitEvent);
-
-	UFUNCTION(Category = "FootStrike", BlueprintImplementableEvent)
-	void ShakeCameraFromFoot(const FFootHitEvent& FootHitEvent);
-	
 #pragma endregion
 
 protected:

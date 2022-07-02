@@ -131,6 +131,69 @@ void AHorrorPlayerCharacter::AddControllerRotator(const FRotator& Rotator)
 	AHorrorPlayerCharacter::AddControllerYawInput(Rotator.Yaw);
 }
 
+void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float Speed, ECollisionChannel TraceChannel, const FVector& Offset)
+{
+	FFootHitEvent FootHitEvent{};
+
+	if (GetMesh()->SkeletalMesh)
+	{
+		const FVector SocketLocation = GetMesh()->GetSocketLocation(SocketName);
+		const FVector Start = SocketLocation + Offset;
+		const FVector End = SocketLocation - Offset;
+
+		TraceFoot(TraceChannel, Start, End, FootHitEvent);
+	}
+
+	FootHitEvent.Speed = Speed;
+
+	if (FootStrikeDelegate.IsBound())
+		FootStrikeDelegate.Broadcast(FootHitEvent);
+}
+
+void AHorrorPlayerCharacter::TraceFoot(ECollisionChannel TraceChannel, const FVector& Start, const FVector& End, FFootHitEvent& FootHitEvent)
+{
+#if !NO_CVARS
+	static const auto HPC_DebugFootStrike = IConsoleManager::Get().FindConsoleVariable(TEXT("HPC.DebugFootStrike"));
+#endif
+
+	TArray<AActor*> TraceIgnore;
+	if (GetMesh()->GetOwner())
+	{
+		TraceIgnore.Add(GetMesh()->GetOwner());
+	}
+
+	FootHitEvent.IsHit = UKismetSystemLibrary::CapsuleTraceSingle(
+		this,
+		Start,
+		End,
+		5.f, 0.0f,
+		UEngineTypes::ConvertToTraceType(TraceChannel),
+		IsFootHitComplex,
+		TraceIgnore,
+#if ENABLE_DRAW_DEBUG && !NO_CVARS
+		HPC_DebugFootStrike->GetBool() ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
+#else
+		EDrawDebugTrace::None,
+#endif
+		FootHitEvent.HitResult,
+		false
+	);
+
+#if !NO_CVARS
+	if (HPC_DebugFootStrike->GetBool())
+	{
+		FString Message;
+		Message += GetMesh()->GetOwner()->GetName();
+		Message += "`s foot strike ";
+		if (FootHitEvent.HitResult.Actor.IsValid())
+			Message += FootHitEvent.HitResult.Actor.Get()->GetName();
+		else
+			Message += "nullptr";
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, Message);
+	}
+#endif
+}
+
 void AHorrorPlayerCharacter::RotateCameraToLookAt(const FVector& NewLookAt, float Duration)
 {
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
@@ -251,69 +314,6 @@ void AHorrorPlayerCharacter::FocusIn(const FVector& Location, float Duration)
 void AHorrorPlayerCharacter::FocusOut(float Duration)
 {
 	DOFOut(Duration);
-}
-
-void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float Speed, ECollisionChannel TraceChannel, const FVector& Offset)
-{
-	FFootHitEvent FootHitEvent{};
-
-	if (GetMesh()->SkeletalMesh)
-	{
-		const FVector SocketLocation = GetMesh()->GetSocketLocation(SocketName);
-		const FVector Start = SocketLocation + Offset;
-		const FVector End = SocketLocation - Offset;
-
-		TraceFoot(TraceChannel, Start, End, FootHitEvent);
-	}
-
-	FootHitEvent.Speed = Speed;
-
-	if (FootStrikeDelegate.IsBound())
-		FootStrikeDelegate.Broadcast(FootHitEvent);
-}
-
-void AHorrorPlayerCharacter::TraceFoot(ECollisionChannel TraceChannel, const FVector& Start, const FVector& End, FFootHitEvent& FootHitEvent)
-{
-#if !NO_CVARS
-	static const auto HPC_DebugFootStrike = IConsoleManager::Get().FindConsoleVariable(TEXT("HPC.DebugFootStrike"));
-#endif
-
-	TArray<AActor*> TraceIgnore;
-	if (GetMesh()->GetOwner())
-	{
-		TraceIgnore.Add(GetMesh()->GetOwner());
-	}
-
-	FootHitEvent.IsHit = UKismetSystemLibrary::CapsuleTraceSingle(
-		this,
-		Start,
-		End,
-		5.f, 0.0f,
-		UEngineTypes::ConvertToTraceType(TraceChannel),
-		IsFootHitComplex,
-		TraceIgnore,
-#if ENABLE_DRAW_DEBUG && !NO_CVARS
-		HPC_DebugFootStrike->GetBool() ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
-#else
-		EDrawDebugTrace::None,
-#endif
-		FootHitEvent.HitResult,
-		false
-	);
-
-#if !NO_CVARS
-	if (HPC_DebugFootStrike->GetBool())
-	{
-		FString Message;
-		Message += GetMesh()->GetOwner()->GetName();
-		Message += "`s foot strike ";
-		if (FootHitEvent.HitResult.Actor.IsValid())
-			Message += FootHitEvent.HitResult.Actor.Get()->GetName();
-		else
-			Message += "nullptr";
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, Message);
-	}
-#endif
 }
 
 void AHorrorPlayerCharacter::UpdateMovementTag()
