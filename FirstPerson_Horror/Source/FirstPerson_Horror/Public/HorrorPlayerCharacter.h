@@ -92,44 +92,47 @@ protected:
 	void EndRotateCamera();
 	virtual void UpdateCameraRotationToDesire(float DeletaTime);
 
-#pragma endregion
-
-#pragma region Focus
-
 protected:
-	UPROPERTY(Category = "Focus", EditAnywhere, BlueprintReadWrite)
-	bool IsInFocus;
+	UPROPERTY(Category = "Camera", EditAnywhere, BlueprintReadWrite)
+	bool IsInDOF;
 
-	UPROPERTY(Category = "Focus", EditAnywhere, BlueprintReadWrite)
-	bool IsFocusIn;
+	UPROPERTY(Category = "Camera", EditAnywhere, BlueprintReadWrite)
+	bool IsDOFIn;
 	
-	UPROPERTY(Category = "Focus", EditAnywhere, BlueprintReadWrite)
-	float FocusSpeed;
+	UPROPERTY(Category = "Camera", EditAnywhere, BlueprintReadWrite)
+	float DOFSpeed;
 
-	UPROPERTY(Category = "Focus", EditAnywhere, BlueprintReadWrite)
-	float FocalDistanceVector;
+	UPROPERTY(Category = "Camera", EditAnywhere, BlueprintReadWrite)
+	float DOFDistanceVector;
 	
-	UPROPERTY(Category = "Focus", EditAnywhere, BlueprintReadWrite)
-	float FocusPrograss;
+	UPROPERTY(Category = "Camera", EditAnywhere, BlueprintReadWrite)
+	float DOFPrograss;
 
-	UPROPERTY(Category = "Focus", EditAnywhere, BlueprintReadWrite)
-	float FocusWeight;
+	UPROPERTY(Category = "Camera", EditAnywhere, BlueprintReadWrite)
+	float DOFWeight;
 
-	UPROPERTY(Category = "Focus", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Camera", EditAnywhere, BlueprintReadWrite)
 	float SetCircleDOFFromFocus = 3000.f;
 
-	void StartFocusEvent();
-	void EndFocusEvent();
+	void StartDOF();
+	void EndDOF();
 
 public:
-	UFUNCTION(Category = "Focus", BlueprintCallable)
-	void FocusIn(const FVector& Location, float Duration);
+	UFUNCTION(Category = "Camera", BlueprintCallable)
+	void DOFIn(const FVector& Location, float Duration);
 
-	UFUNCTION(Category = "Focus", BlueprintCallable)
-	void FocusOut(float Duration);
+	UFUNCTION(Category = "Camera", BlueprintCallable)
+	void DOFOut(float Duration);
 
 protected:
 	void UpdateFocusEvent(float DeltaTime);
+
+public:
+	UFUNCTION(Category = "Camera", BlueprintCallable)
+	void FocusIn(const FVector& Location, float Duration);
+
+	UFUNCTION(Category = "Camera", BlueprintCallable)
+	void FocusOut(float Duration);
 
 #pragma endregion
 

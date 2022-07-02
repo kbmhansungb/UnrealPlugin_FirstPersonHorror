@@ -43,7 +43,7 @@ void AHorrorPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (IsInFocus)
+	if (IsInDOF)
 		UpdateFocusEvent(DeltaTime);
 
 	if (IsInDesireCameraRotation)
@@ -183,24 +183,24 @@ void AHorrorPlayerCharacter::UpdateCameraRotationToDesire(float DeletaTime)
 	AddControllerRotator(DesireCameraRotator * Delta);
 }
 
-void AHorrorPlayerCharacter::StartFocusEvent()
+void AHorrorPlayerCharacter::StartDOF()
 {
-	IsInFocus = true;
-	FocusPrograss = 0.f;
+	IsInDOF = true;
+	DOFPrograss = 0.f;
 }
 
-void AHorrorPlayerCharacter::EndFocusEvent()
+void AHorrorPlayerCharacter::EndDOF()
 {
-	IsInFocus = false;
+	IsInDOF = false;
 }
 
-void AHorrorPlayerCharacter::FocusIn(const FVector& Location, float Duration)
+void AHorrorPlayerCharacter::DOFIn(const FVector& Location, float Duration)
 {
 	if (Duration <= FLT_EPSILON)
 		return;
 
-	FocusSpeed = 1.f / Duration;
-	IsFocusIn = true;
+	DOFSpeed = 1.f / Duration;
+	IsDOFIn = true;
 
 	if (DefaultCamera->PostProcessSettings.DepthOfFieldFocalDistance == 0.f)
 	{
@@ -208,39 +208,49 @@ void AHorrorPlayerCharacter::FocusIn(const FVector& Location, float Duration)
 	}
 	else
 	{
-		FocalDistanceVector
+		DOFDistanceVector
 			= (Location - GetActorLocation()).Size()
 			- DefaultCamera->PostProcessSettings.DepthOfFieldFocalDistance;
 	}
 
-	StartFocusEvent();
+	StartDOF();
+}
+
+void AHorrorPlayerCharacter::DOFOut(float Duration)
+{
+	DOFSpeed = 1.f / Duration;
+	IsDOFIn = false;
+
+	DOFDistanceVector = 0.f;
+
+	StartDOF();
+}
+
+void AHorrorPlayerCharacter::UpdateFocusEvent(float DeltaTime)
+{
+	float Delta = DeltaTime * DOFSpeed;
+	DOFPrograss += DeltaTime;
+	DOFWeight = FMath::Clamp(IsDOFIn ? DOFWeight + Delta : DOFWeight - Delta, 0.f, 1.f);
+
+	if (DOFPrograss >= 1.f)
+	{
+		Delta -= DOFPrograss - 1.f;
+		EndDOF();
+	}
+
+	DefaultCamera->PostProcessSettings.DepthOfFieldDepthBlurRadius = DOFWeight * SetCircleDOFFromFocus;
+	DefaultCamera->PostProcessSettings.DepthOfFieldFocalDistance += DOFDistanceVector * Delta;
+}
+
+void AHorrorPlayerCharacter::FocusIn(const FVector& Location, float Duration)
+{
+	DOFIn(Location, Duration);
 	RotateCameraToLookAt(Location, Duration);
 }
 
 void AHorrorPlayerCharacter::FocusOut(float Duration)
 {
-	FocusSpeed = 1.f / Duration;
-	IsFocusIn = false;
-
-	FocalDistanceVector = 0.f;
-
-	StartFocusEvent();
-}
-
-void AHorrorPlayerCharacter::UpdateFocusEvent(float DeltaTime)
-{
-	float Delta = DeltaTime * FocusSpeed;
-	FocusPrograss += DeltaTime;
-	FocusWeight = FMath::Clamp(IsFocusIn ? FocusWeight + Delta : FocusWeight - Delta, 0.f, 1.f);
-
-	if (FocusPrograss >= 1.f)
-	{
-		Delta -= FocusPrograss - 1.f;
-		EndFocusEvent();
-	}
-
-	DefaultCamera->PostProcessSettings.DepthOfFieldDepthBlurRadius = FocusWeight * SetCircleDOFFromFocus;
-	DefaultCamera->PostProcessSettings.DepthOfFieldFocalDistance += FocalDistanceVector * Delta;
+	DOFOut(Duration);
 }
 
 void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float Speed, ECollisionChannel TraceChannel, const FVector& Offset)
