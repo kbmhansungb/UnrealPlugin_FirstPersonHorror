@@ -8,7 +8,7 @@
 #include "DelegateEvent.generated.h"
 
 USTRUCT(BlueprintType)
-struct FIRSTPERSON_HORROR_API FFootHitEvent
+struct FIRSTPERSON_HORROR_API FFootHitData
 {
 	GENERATED_BODY()
 
@@ -17,17 +17,13 @@ public:
 	FName SocketName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Multifly = 1.f;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FHitResult HitResult;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Speed;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool IsHit;
 };
-//constexpr int Size = sizeof(FFootHitEvent);
 
-DECLARE_MULTICAST_DELEGATE_OneParam(
-FFootStrikeDelegate,
-const FFootHitEvent&
-);
+DECLARE_MULTICAST_DELEGATE_OneParam(FFootStrikeDelegate, const FFootHitData&);
