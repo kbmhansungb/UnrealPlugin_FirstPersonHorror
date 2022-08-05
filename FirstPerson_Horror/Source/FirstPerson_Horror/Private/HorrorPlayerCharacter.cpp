@@ -137,7 +137,7 @@ void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float Speed)
 	FFootHitData FootHitEvent{};
 
 	FootHitEvent.SocketName = SocketName;
-	FootHitEvent.Speed = Speed;
+	FootHitEvent.Multifly = Speed;
 	if (GetMesh()->SkeletalMesh)
 	{
 		const FVector SocketLocation = GetMesh()->GetSocketLocation(SocketName);

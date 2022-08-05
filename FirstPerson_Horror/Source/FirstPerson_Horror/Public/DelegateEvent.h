@@ -17,7 +17,7 @@ public:
 	FName SocketName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Speed;
+	float Multifly = 1.f;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FHitResult HitResult;
