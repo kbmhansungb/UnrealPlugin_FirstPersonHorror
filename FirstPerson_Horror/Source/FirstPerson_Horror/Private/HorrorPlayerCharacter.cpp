@@ -134,7 +134,7 @@ void AHorrorPlayerCharacter::AddControllerRotator(const FRotator& Rotator)
 
 void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float Speed)
 {
-	FFootHitEvent FootHitEvent{};
+	FFootHitData FootHitEvent{};
 
 	FootHitEvent.SocketName = SocketName;
 	FootHitEvent.Speed = Speed;
@@ -157,7 +157,7 @@ void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float Speed)
 		FootStrikeDelegate.Broadcast(FootHitEvent);
 }
 
-void AHorrorPlayerCharacter::TraceFoot(const FVector& Start, const FVector& End, FFootHitEvent& FootHitEvent)
+void AHorrorPlayerCharacter::TraceFoot(const FVector& Start, const FVector& End, FFootHitData& FootHitEvent)
 {
 #if !NO_CVARS
 	static const auto DebugFootStrike = IConsoleManager::Get().FindConsoleVariable(TEXT("Horror.DebugFootStrike"));
@@ -201,7 +201,7 @@ void AHorrorPlayerCharacter::TraceFoot(const FVector& Start, const FVector& End,
 #endif
 }
 
-void AHorrorPlayerCharacter::PlayFootSound(const FFootHitEvent& FootHitEvent)
+void AHorrorPlayerCharacter::PlayFootSound(const FFootHitData& FootHitEvent)
 {
 	if (FootHitEvent.IsHit)
 	{
@@ -210,7 +210,7 @@ void AHorrorPlayerCharacter::PlayFootSound(const FFootHitEvent& FootHitEvent)
 	}
 }
 
-void AHorrorPlayerCharacter::ShakeCameraFromFoot(const FFootHitEvent& FootHitEvent)
+void AHorrorPlayerCharacter::ShakeCameraFromFoot(const FFootHitData& FootHitEvent)
 {
 	if (this->IsPlayerControlled())
 	{

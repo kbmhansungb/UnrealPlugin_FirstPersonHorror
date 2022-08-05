@@ -81,20 +81,20 @@ public:
 	void CallFootStrike(FName SocketName, float Speed);
 
 protected:
-	virtual void TraceFoot(const FVector& Start, const FVector& End, FFootHitEvent& FootHitEvent);
+	virtual void TraceFoot(const FVector& Start, const FVector& End, FFootHitData& FootHitEvent);
 	
-	void PlayFootSound(const FFootHitEvent& FootHitEvent);
-	void ShakeCameraFromFoot(const FFootHitEvent& FootHitEvent);
+	void PlayFootSound(const FFootHitData& FootHitEvent);
+	void ShakeCameraFromFoot(const FFootHitData& FootHitEvent);
 	
 	UFUNCTION(Category = "Movement", BlueprintNativeEvent)
 	void GetFootStrikeTraceLine(const FName& SocketName, FVector& StartOffset, FVector& EndOffset);
 	virtual void GetFootStrikeTraceLine_Implementation(const FName& SocketName, FVector& StartOffset, FVector& EndOffset);
 
 	UFUNCTION(Category = "Movement", BlueprintImplementableEvent)
-	USoundBase* GetFootSound(const FFootHitEvent& FootHitEvent);
+	USoundBase* GetFootSound(const FFootHitData& FootHitEvent);
 
 	UFUNCTION(Category = "Movement", BlueprintImplementableEvent)
-	TSubclassOf<UCameraShakeBase> GetFootShakeCameraClass(const FFootHitEvent& FootHitEvent);
+	TSubclassOf<UCameraShakeBase> GetFootShakeCameraClass(const FFootHitData& FootHitEvent);
 
 #pragma endregion
 

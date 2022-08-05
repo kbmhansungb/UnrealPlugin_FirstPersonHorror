@@ -8,7 +8,7 @@
 #include "DelegateEvent.generated.h"
 
 USTRUCT(BlueprintType)
-struct FIRSTPERSON_HORROR_API FFootHitEvent
+struct FIRSTPERSON_HORROR_API FFootHitData
 {
 	GENERATED_BODY()
 
@@ -25,9 +25,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsHit;
 };
-//constexpr int Size = sizeof(FFootHitEvent);
 
-DECLARE_MULTICAST_DELEGATE_OneParam(
-FFootStrikeDelegate,
-const FFootHitEvent&
-);
+DECLARE_MULTICAST_DELEGATE_OneParam(FFootStrikeDelegate, const FFootHitData&);
