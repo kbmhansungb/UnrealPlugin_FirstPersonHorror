@@ -10,6 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 #include "Engine/GameEngine.h"
 #include "DrawDebugHelpers.h"
@@ -90,8 +91,6 @@ void AHorrorPlayerCharacter::StopJumping()
 void AHorrorPlayerCharacter::Landed(const FHitResult& HitResult)
 {
 	Super::Landed(HitResult);
-
-	CallFootStrike(FName("RightFoot"), GetCharacterMovement()->Velocity.Size());
 }
 
 void AHorrorPlayerCharacter::MoveForward(float Val)
@@ -132,18 +131,16 @@ void AHorrorPlayerCharacter::AddControllerRotator(const FRotator& Rotator)
 	AHorrorPlayerCharacter::AddControllerYawInput(Rotator.Yaw);
 }
 
-void AHorrorPlayerCharacter::CallFootStrike(FName SocketName, float Speed)
+void AHorrorPlayerCharacter::CallFootStrike_Implementation(const FFootHitData& InFootHitEvent)
 {
-	FFootHitData FootHitEvent{};
+	FFootHitData FootHitEvent = InFootHitEvent;
 
-	FootHitEvent.SocketName = SocketName;
-	FootHitEvent.Multifly = Speed;
 	if (GetMesh()->SkeletalMesh)
 	{
-		const FVector SocketLocation = GetMesh()->GetSocketLocation(SocketName);
+		const FVector SocketLocation = GetMesh()->GetSocketLocation(FootHitEvent.SocketName);
 		FVector Start;
 		FVector End;
-		GetFootStrikeTraceLine(SocketName, Start, End);
+		GetFootStrikeTraceLine(FootHitEvent.SocketName, Start, End);
 		Start += SocketLocation;
 		End += SocketLocation;
 
@@ -205,7 +202,7 @@ void AHorrorPlayerCharacter::PlayFootSound(const FFootHitData& FootHitEvent)
 {
 	if (FootHitEvent.IsHit)
 	{
-		USoundBase* Sound = GetFootSound(FootHitEvent);
+		USoundBase* Sound = ICharacterFootHit::Execute_GetFootSound(this, FootHitEvent);
 		UGameplayStatics::PlaySoundAtLocation(this, Sound, FootHitEvent.HitResult.Location);
 	}
 }

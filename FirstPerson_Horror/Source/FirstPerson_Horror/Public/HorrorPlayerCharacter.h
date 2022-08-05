@@ -4,14 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "DelegateEvent.h"
-#include <Kismet/KismetMathLibrary.h>
+#include "CharacterFootHit.h"
 #include "HorrorPlayerCharacter.generated.h"
 
 class UCameraComponent;
 
 UCLASS(BlueprintType)
-class FIRSTPERSON_HORROR_API AHorrorPlayerCharacter : public ACharacter
+class FIRSTPERSON_HORROR_API AHorrorPlayerCharacter : public ACharacter,
+	public ICharacterFootHit
 {
 	GENERATED_BODY()
 
@@ -77,8 +77,7 @@ public:
 public:
 	FFootStrikeDelegate FootStrikeDelegate;
 	
-	UFUNCTION(BlueprintCallable)
-	void CallFootStrike(FName SocketName, float Speed);
+	virtual void CallFootStrike_Implementation(const FFootHitData& InFootHitEvent);
 
 protected:
 	virtual void TraceFoot(const FVector& Start, const FVector& End, FFootHitData& FootHitEvent);
@@ -89,9 +88,6 @@ protected:
 	UFUNCTION(Category = "Movement", BlueprintNativeEvent)
 	void GetFootStrikeTraceLine(const FName& SocketName, FVector& StartOffset, FVector& EndOffset);
 	virtual void GetFootStrikeTraceLine_Implementation(const FName& SocketName, FVector& StartOffset, FVector& EndOffset);
-
-	UFUNCTION(Category = "Movement", BlueprintImplementableEvent)
-	USoundBase* GetFootSound(const FFootHitData& FootHitEvent);
 
 	UFUNCTION(Category = "Movement", BlueprintImplementableEvent)
 	TSubclassOf<UCameraShakeBase> GetFootShakeCameraClass(const FFootHitData& FootHitEvent);
