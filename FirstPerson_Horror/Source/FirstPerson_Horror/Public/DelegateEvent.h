@@ -17,12 +17,12 @@ public:
 	FName SocketName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Speed;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FHitResult HitResult;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Speed;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool IsHit;
 };
 
