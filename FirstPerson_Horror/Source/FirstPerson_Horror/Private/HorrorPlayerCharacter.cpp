@@ -156,7 +156,7 @@ void AHorrorPlayerCharacter::CallFootStrike_Implementation(const FFootHitData& I
 
 void AHorrorPlayerCharacter::TraceFoot(const FVector& Start, const FVector& End, FFootHitData& FootHitEvent)
 {
-#if !NO_CVARS
+#if WITH_EDITOR
 	static const auto DebugFootStrike = IConsoleManager::Get().FindConsoleVariable(TEXT("Horror.DebugFootStrike"));
 #endif
 
@@ -174,7 +174,7 @@ void AHorrorPlayerCharacter::TraceFoot(const FVector& Start, const FVector& End,
 		UEngineTypes::ConvertToTraceType(FootTraceChannel),
 		IsFootHitComplex,
 		TraceIgnore,
-#if ENABLE_DRAW_DEBUG && !NO_CVARS
+#if WITH_EDITOR
 		DebugFootStrike->GetBool() ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
 #else
 		EDrawDebugTrace::None,
@@ -183,7 +183,7 @@ void AHorrorPlayerCharacter::TraceFoot(const FVector& Start, const FVector& End,
 		false
 	);
 
-#if !NO_CVARS
+#if WITH_EDITOR
 	if (DebugFootStrike->GetBool())
 	{
 		FString Message;
