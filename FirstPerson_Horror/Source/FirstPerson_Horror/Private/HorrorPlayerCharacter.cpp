@@ -30,13 +30,13 @@ AHorrorPlayerCharacter::AHorrorPlayerCharacter()
 // Called when the game starts or when spawned
 void AHorrorPlayerCharacter::BeginPlay()
 {
-	Super::BeginPlay();
+	ACharacter::BeginPlay();
 }
 
 // Called every frame
 void AHorrorPlayerCharacter::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	ACharacter::Tick(DeltaTime);
 
 	if (IsInDOF)
 		UpdateFocusEvent(DeltaTime);
@@ -352,14 +352,12 @@ void AHorrorPlayerCharacter::UpdateMovementTag()
 	{
 		int32 Index = MovementBase->ComponentTags.Find(FName("Movement"));
 
-#if WITH_EDITOR
 		if (MovementBase->ComponentTags.IsValidIndex(Index + 1) == false)
 		{
 			MovementTag = FName();
 			UE_LOG(LogTemp, Error, TEXT("InValid Index"));
 			return;
 		}
-#endif
 		MovementTag = MovementBase->ComponentTags[Index + 1];
 	}
 	else
@@ -370,7 +368,7 @@ void AHorrorPlayerCharacter::UpdateMovementTag()
 
 void AHorrorPlayerCharacter::BaseChange()
 {
-	Super::BaseChange();
+	ACharacter::BaseChange();
 
 	UpdateMovementTag();
 }
